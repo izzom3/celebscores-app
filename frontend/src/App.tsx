@@ -39,7 +39,7 @@ const ActorFilmCredits: React.FC = () => {
         setActorNameFromAPI(null); // Reset the actor name from API
 
         try {
-            const response = await axios.get<ActorFilmCreditsResponse>(`http://localhost:7071/api/celebscores?name=${encodeURIComponent(actorName)}`);
+            const response = await axios.get<ActorFilmCreditsResponse>(`/api/celebscores?name=${encodeURIComponent(actorName)}`);
             setCredits(response.data.credits);
             setActorNameFromAPI(response.data.actorName); // Set the actor name from API
             setAverageRating(response.data.averageRating); // Set the average rating

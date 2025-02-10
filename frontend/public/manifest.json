@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Actor Scores",
+  "name": "See how your favorite actors are scored",
   "icons": [
     {
       "src": "favicon.ico",

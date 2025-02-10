@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 interface Movie {
     id: string;
@@ -57,47 +58,50 @@ const ActorFilmCredits: React.FC = () => {
             setLoading(false);
         }
     };
-
     return (
-        <div>
-            <h1>Celeb Scores</h1>
-            <div>
-                <input
-                    type="text"
-                    placeholder="Enter actor's name"
-                    value={actorName}
-                    onChange={(e) => setActorName(e.target.value)}
-                />
-                <button onClick={handleSearch} disabled={loading}>
-                    {loading ? 'Searching...' : 'Search'}
-                </button>
-            </div>
-
-            {error && <div style={{ color: 'red' }}>{error}</div>}
-
-            {credits && credits.cast.length > 0  &&(
-                <div>
-                    <h2>Results for "{actorNameFromAPI}"</h2>
-                    {averageRating !== "N/A" && <p>Average Film Rating: {averageRating}</p>}
-                    <ul>
-                        {credits.cast.map((movie: Movie) => (
-                            <li key={movie.id}>
-                                <img
-                                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                                    alt={movie.title}
-                                    style={{ width: '100px', height: 'auto' }}
-                                />
-                                <strong>{movie.title}</strong> ({movie.release_date}) - {movie.character} - {movie.vote_average}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-            {credits && credits.cast.length === 0 && actorNameFromAPI && (
-              <div>No movies found for {actorNameFromAPI}</div>
-            )}
-        </div>
-    );
+      <div className="container">
+          <h1>Celeb Scores</h1>
+          <div className="search-bar">
+              <input
+                  type="text"
+                  placeholder="Enter actor's name"
+                  value={actorName}
+                  onChange={(e) => setActorName(e.target.value)}
+              />
+              <button onClick={handleSearch} disabled={loading}>
+                {loading ? <div className="loading-spinner"></div> : 'Search'}
+              </button>
+          </div>
+  
+          {error && <div className="error">{error}</div>}
+  
+          {credits && credits.cast.length > 0 && (
+              <div className="results">
+                  <h2>Results for "{actorNameFromAPI}"</h2>
+                  {averageRating !== "N/A" && <p>Average Film Rating: {averageRating}</p>}
+                  <div className="movie-grid">
+                      {credits.cast.map((movie: Movie) => (
+                          <div key={movie.id} className="movie-card">
+                              <img
+                                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                  alt={movie.title}
+                              />
+                              <div className="movie-info">
+                                  <strong>{movie.title}</strong>
+                                  <div className="release-date">Release Date: {movie.release_date}</div>
+                                  <div className="character">Character: {movie.character}</div>
+                                  <div className="rating">Rating: {movie.vote_average}</div>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          )}
+          {credits && credits.cast.length === 0 && actorNameFromAPI && (
+              <div className="no-results">No movies found for {actorNameFromAPI}</div>
+          )}
+      </div>
+  );
 };
 
 export default ActorFilmCredits;

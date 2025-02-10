@@ -56,18 +56,21 @@ const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({ movieDetails, isO
             <p><strong>Genres:</strong> {movieDetails.genres.join(', ')}</p>
             <p><strong>Rating:</strong> {movieDetails.vote_average} ({movieDetails.vote_count} votes)</p>
             <h3>Top Cast Members</h3>
-            <ul>
-                {movieDetails.cast.map((member) => (
-                    <li key={member.id}>
-                        <img
-                            src={`https://image.tmdb.org/t/p/w200${member.profile_path}`}
-                            alt={member.name}
-                            style={{ width: '50px', height: 'auto' }}
-                        />
-                        <strong>{member.name}</strong> as {member.character}
-                    </li>
-                ))}
-            </ul>
+                <ul className="cast-list">
+                    {movieDetails.cast.map((member) => (
+                        <li key={member.id} className="cast-member">
+                            <img
+                                src={`https://image.tmdb.org/t/p/w200${member.profile_path}`}
+                                alt={member.name}
+                                className="cast-member-img"
+                            />
+                            <div className="cast-member-info">
+                                <strong>{member.name}</strong>
+                                <span className="character"> as {member.character}</span>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             <h3>Trailer</h3>
             {movieDetails.trailer ? (
                 <iframe

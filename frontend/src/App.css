@@ -311,3 +311,42 @@ h1 {
 .modal button:hover {
   background-color: #0056b3;
 }
+
+/* Cast List */
+.cast-list {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
+}
+
+/* Cast Member Container */
+.cast-member {
+  display: flex;
+  align-items: center;
+  margin: 10px;
+  width: 150px;
+  text-align: center;
+}
+
+/* Cast Member Image */
+.cast-member-img {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+/* Cast Member Info */
+.cast-member-info {
+  margin-top: 5px;
+}
+
+/* Character Text */
+.character {
+  font-size: 0.9rem;
+  color: #777;
+}

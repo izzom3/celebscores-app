@@ -1,11 +1,12 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import axios from "axios";
+import * as dotenv from "dotenv";
+dotenv.config();
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 // Define the function to handle the request
 export async function celebscores(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
-
-    const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
     // Get the actor's name from the query string
     const actorName = request.query.get('name');
@@ -112,9 +113,116 @@ export async function celebscores(request: HttpRequest, context: InvocationConte
     }
 };
 
-// Register the HTTP trigger handler with the app
+// Define the function to handle the movie details request
+export async function movieDetails(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+    context.log(`Http function processed request for url "${request.url}"`);
+    // Get the movie ID from the query string
+    const movieId = request.query.get('movieId');
+
+    if (!movieId) {
+        return {
+            status: 400,
+            body: JSON.stringify({
+                error: 'Please provide a movie ID as a query parameter (e.g., ?movieId=12345).',
+            }),
+            headers: {
+                "Access-Control-Allow-Origin": "*",  // Allow frontend requests
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type"
+            }
+        };
+    }
+
+    try {
+        // Step 1: Fetch movie details
+        const detailsResponse = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
+            params: {
+                language: 'en-US',
+            },
+            headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`,
+                accept: 'application/json',
+            },
+        });
+
+        // Step 2: Fetch cast members
+        const creditsResponse = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, {
+            params: {
+                language: 'en-US',
+            },
+            headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`,
+                accept: 'application/json',
+            },
+        });
+
+        // Step 3: Fetch videos (trailers)
+        const videosResponse = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, {
+            params: {
+                language: 'en-US',
+            },
+            headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`,
+                accept: 'application/json',
+            },
+        });
+
+        // Step 4: Format the response
+        const movieDetails = {
+            id: detailsResponse.data.id,
+            title: detailsResponse.data.title,
+            overview: detailsResponse.data.overview,
+            release_date: detailsResponse.data.release_date,
+            genres: detailsResponse.data.genres.map((genre: any) => genre.name),
+            vote_average: detailsResponse.data.vote_average,
+            vote_count: detailsResponse.data.vote_count,
+            poster_path: detailsResponse.data.poster_path,
+            cast: creditsResponse.data.cast.slice(0, 3).map((member: any) => ({
+                id: member.id,
+                name: member.name,
+                character: member.character,
+                profile_path: member.profile_path,
+            })),
+            trailer: videosResponse.data.results.find((video: any) => video.site === 'YouTube' && video.type === 'Trailer'),
+        };
+
+        // Return the response as an object
+        return {
+            status: 200,
+            jsonBody: movieDetails,
+            headers: {
+                "Access-Control-Allow-Origin": "*",  // Allow frontend requests
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type"
+            }
+        };
+    } catch (error) {
+        context.log('Error fetching movie details:', error);
+
+        // Return an error response
+        return {
+            status: 500,
+            body: JSON.stringify({
+                error: 'An error occurred while fetching movie details.',
+            }),
+            headers: {
+                "Access-Control-Allow-Origin": "*",  // Allow frontend requests
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type"
+            }
+        };
+    }
+}
+
+// Register the HTTP trigger handlers with the app
 app.http('celebscores', {
     methods: ['GET', 'POST'],
     authLevel: 'anonymous',
     handler: celebscores,
+});
+
+app.http('movieDetails', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    handler: movieDetails,
 });

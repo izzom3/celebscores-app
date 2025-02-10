@@ -1,6 +1,28 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
+import MovieDetailsModal from './MovieDetailsModal'; 
+
+interface MovieDetails {
+    id: number;
+    title: string;
+    overview: string;
+    release_date: string;
+    genres: string[];
+    vote_average: number;
+    vote_count: number;
+    poster_path: string;
+    cast: {
+        id: number;
+        name: string;
+        character: string;
+        profile_path: string;
+    }[];
+    trailer: {
+        key: string;
+        name: string;
+    } | null;
+}
 
 interface Movie {
     id: string;
@@ -29,6 +51,8 @@ const ActorFilmCredits: React.FC = () => {
     const [actorNameFromAPI, setActorNameFromAPI] = useState<string | null>(null);
     const [averageRating, setAverageRating] = useState<any | null>(null);
     const [sortOption, setSortOption] = useState<string>('title');
+    const [selectedMovieDetails, setSelectedMovieDetails] = useState<MovieDetails | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     const handleSearch = async () => {
         if (!actorName) {
@@ -41,7 +65,7 @@ const ActorFilmCredits: React.FC = () => {
         setActorNameFromAPI(null); // Reset the actor name from API
 
         try {
-            const response = await axios.get<ActorFilmCreditsResponse>(`https://celebscores-backend.azurewebsites.net/api/celebscores?name=${encodeURIComponent(actorName)}`);
+            const response = await axios.get<ActorFilmCreditsResponse>(` http://localhost:7071/api/celebscores?name=${encodeURIComponent(actorName)}`);
             setCredits(response.data.credits);
             setActorNameFromAPI(response.data.actorName); // Set the actor name from API
             setAverageRating(response.data.averageRating); // Set the average rating
@@ -59,6 +83,26 @@ const ActorFilmCredits: React.FC = () => {
             setLoading(false);
         }
     };
+
+    const handleMovieClick = async (movieId: any) => {
+        console.log('isModalOpen:', isModalOpen);
+        if (isModalOpen) return; // Prevent multiple modals
+        try {
+            const response = await axios.get(` http://localhost:7071/api/movieDetails?movieId=${movieId}`);
+            setSelectedMovieDetails(response.data);
+            setIsModalOpen(true);
+            console.log('Set isModalOpen to true');
+        } catch (error) {
+            console.error('Error fetching movie details:', error);
+            setError('Failed to fetch movie details.');
+        }
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false); // Close the modal
+        setSelectedMovieDetails(null); // Reset the movie details
+    };
+
 
     const getSortedMovies = () => {
       if (!credits) return [];
@@ -115,7 +159,9 @@ const ActorFilmCredits: React.FC = () => {
                     </div>
                     <div className="movie-grid">
                         {getSortedMovies().map((movie: Movie) => (
-                            <div key={movie.id} className="movie-card">
+                            <div key={movie.id}
+                                className="movie-card"
+                                onClick={() => handleMovieClick(movie.id)}>
                                 <img
                                     src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                                     alt={movie.title}
@@ -134,6 +180,13 @@ const ActorFilmCredits: React.FC = () => {
           {credits && credits.cast.length === 0 && actorNameFromAPI && (
               <div className="no-results">No movies found for {actorNameFromAPI}</div>
           )}
+           {selectedMovieDetails && (
+                <MovieDetailsModal
+                    movieDetails={selectedMovieDetails}
+                    isOpen={isModalOpen}
+                    onRequestClose={handleModalClose}
+                />
+            )}
       </div>
   );
 };

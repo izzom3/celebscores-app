@@ -190,3 +190,19 @@ h1 {
   color: #7f8c8d;
   margin-top: 20px;
 }
+
+.sorting {
+  margin-bottom: 10px;
+}
+
+.sorting label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.sorting select {
+  padding: 5px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}

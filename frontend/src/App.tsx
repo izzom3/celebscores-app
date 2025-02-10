@@ -64,7 +64,7 @@ const ActorFilmCredits: React.FC = () => {
       if (!credits) return [];
 
       return [...credits.cast].sort((a, b) => {
-          if (sortOption === 'title_desc') {
+          if (sortOption === 'title_desc' || !sortOption) {
               return a.title.localeCompare(b.title); // Sort by Title (A-Z)
           } else if (sortOption === 'title_asc') {
               return b.title.localeCompare(a.title); // Sort by Title (Z-A)
